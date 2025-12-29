@@ -9,34 +9,34 @@
 		<style type="text/css">
 		</style> 
 		<script type="text/javascript">
-			let DateFormatter = function() {
+			const DateFormatter = function() {
 				this.formatOpt = { weekday: "short" };
 				this.dateTimeFormat = new Intl.DateTimeFormat("ja-JP", this.formatOpt);
 				this.getDatesString = (date) => {
-					let strYear = "" + date.getFullYear();
-					let strMonth = ("00" + (date.getMonth() + 1)).slice(-2);
-					let strDay = ("00" + date.getDate()).slice(-2);
-					let strWeek = this.dateTimeFormat.format(date);
-					let ret = strYear + '/' + strMonth + '/' + strDay + ' (' + strWeek + ')';
+					const strYear = "" + date.getFullYear();
+					const strMonth = ("00" + (date.getMonth() + 1)).slice(-2);
+					const strDay = ("00" + date.getDate()).slice(-2);
+					const strWeek = this.dateTimeFormat.format(date);
+					const ret = strYear + '/' + strMonth + '/' + strDay + ' (' + strWeek + ')';
 					return ret;
 				}
 				this.getTimesString = (date) => {
-					let strHour = ("00" + date.getHours()).slice(-2);
-					let strMin = ("00" + date.getMinutes()).slice(-2);
-					let strSec = ("00" + date.getSeconds()).slice(-2);
-					let strMillisec = ("000" + date.getMilliseconds()).slice(-3);
-					let ret = strHour + ':' + strMin + ':' + strSec;
+					const strHour = ("00" + date.getHours()).slice(-2);
+					const strMin = ("00" + date.getMinutes()).slice(-2);
+					const strSec = ("00" + date.getSeconds()).slice(-2);
+					const strMillisec = ("000" + date.getMilliseconds()).slice(-3);
+					const ret = strHour + ':' + strMin + ':' + strSec;
 					//ret += '.' + strMillisec;
 					return ret;
 				}
 				this.getFormatString = (date) => {
-					let strDate = this.getDatesString(date);
-					let strTime = this.getTimesString(date);
+					const strDate = this.getDatesString(date);
+					const strTime = this.getTimesString(date);
 					return strDate + ' ' + strTime;
 				};
 			};
-			let WarekiConverter = function() {
-				let WarekiYear = function(startDate, gengo, date) {
+			const WarekiConverter = function() {
+				const WarekiYear = function(startDate, gengo, date) {
 					this.startDate = startDate;
 					this.gengo = gengo;
 					this.date = date;
@@ -50,7 +50,7 @@
 				this.taisho = new WarekiYear(new Date('1912/07/30 UTC+9'), '大正');
 				this.meiji = new WarekiYear(new Date('1868/09/04 UTC+9'), '明治');
 				this.getNengo = (date) => {
-					let list = [this.reiwa, this.heisei, this.showa, this.taisho, this.meiji];
+					const list = [this.reiwa, this.heisei, this.showa, this.taisho, this.meiji];
 					for(let i = 0; i < list.length; i++) {
 						if(date >= list[i].startDate) {
 							return new WarekiYear(
@@ -68,27 +68,30 @@
 			 * onload
 			 */
 			window.onload = function() {
-
-				let dateFormatter = new DateFormatter();
-				let blank = () => undefined;
-				let init = function(date) {
+				const symbole = [
+					'🐭 子', '🐮 丑', '🐯 寅',
+					'🐰 卯', '🐲 辰', '🐍 巳',
+					'🐴 午', '🐏 未', '🐵 申',
+					'🐔 酉', '🐶 犬', '🐗 亥'
+				];
+				const dateFormatter = new DateFormatter();
+				const tick = function() {
+					const date = new Date();
+					// 時間
 					(function() {
-						let nengo = new WarekiConverter().getNengo(date);
-						document.getElementById('wareki').textContent = nengo.gengo + ' ' + nengo.getYear() + "年";
+						const str = dateFormatter.getFormatString(date);
+						document.querySelector('#time').textContent = str;
 					})();
-				};
 
-				let tick = function() {
-					let date = new Date();
+					// 和暦
 					(function() {
-						(function() {
-							init(date);
-							init = blank;
-						})();
+						const nengo = new WarekiConverter().getNengo(date);
+						document.querySelector('#wareki').textContent = nengo.gengo + ' ' + nengo.getYear() + "年";
 					})();
+
+					// 干支
 					(function() {
-						let str = dateFormatter.getFormatString(date);
-						document.getElementById('time').textContent = str;
+						document.querySelector('#eto').textContent = symbole[((date.getFullYear() + 8) % 12)] + '年';
 					})();
 
 					setTimeout(tick, 1000 - new Date().getMilliseconds());
@@ -105,6 +108,7 @@
 			<div>
 				<h2><span id="time">&nbsp;</span></h2>
 				<h2><span id="wareki">&nbsp;</span></h2>
+				<h2><span id="eto">&nbsp;</span></h2>
 			</div>
 		</div>
 	</body>
